@@ -44,6 +44,24 @@ int main(int argc, char **argv) {
       (std::cout << options.help() << std::endl);
       exit(0);
     }
+    {
+      Halide::Func gradient;
+      Halide::Var x;
+      Halide::Var y;
+      Halide::Expr e((x + y));
+      gradient(x, y) = e;
+      {
+        Halide::Buffer<int32_t> output(gradient.realize(800, 600));
+        for (int j = 0; (j < output.height()); j++) {
+          for (int i = 0; (i < output.width()); i++) {
+            if (((i + j) != output(i, j))) {
+              (std::cerr << "error, expected " << (i + j) << " but result is "
+                         << output(i, j) << std::endl);
+            }
+          }
+        }
+      }
+    }
   } catch (const cxxopts::OptionException &e) {
 
     (std::cout << "error parsing options: " << e.what() << std::endl);

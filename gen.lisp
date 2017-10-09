@@ -119,7 +119,20 @@ is replaced with replacement."
 				       (statements
 					(macroexpand (e (funcall options.help)))
 					(funcall exit 0))))
-				
+				(let ((gradient :type "Halide::Func")
+				      (x :type "Halide::Var")
+				      (y :type "Halide::Var")
+				      (e :type "Halide::Expr" :ctor (+ x y))
+				      )
+				  (setf (funcall gradient x y) e)
+				  (let ((output :type "Halide::Buffer<int32_t>"
+						:ctor (funcall gradient.realize 800 600)))
+				    (for ((j 0 :type int) (< j (funcall output.height)) j++)
+				      (for ((i 0 :type int) (< i (funcall output.width)) i++)
+					(if (!= (+ i j) (funcall output i j))
+					    (statements
+					     (macroexpand (er "error, expected " (+ i j)
+							      " but result is " (funcall output i j)))))))))
 				)
 			      
 			      #+cxxopts (raw "catch (const cxxopts::OptionException& e)")
