@@ -1,5 +1,6 @@
 //! \file main.cpp
 #include "Halide.h"
+#include "cxxopts.hpp"
 #include <array>
 #include <iostream>
 
@@ -35,6 +36,18 @@
 //! @return Integer
 
 int main(int argc, char **argv) {
-  {}
+  try {
+    cxxopts::Options options("drm_draw", "draw to drm device");
+    options.add_options()("h,help", "Print help");
+    options.parse(argc, argv);
+    if (options.count("help")) {
+      (std::cout << options.help() << std::endl);
+      exit(0);
+    }
+  } catch (const cxxopts::OptionException &e) {
+
+    (std::cout << "error parsing options: " << e.what() << std::endl);
+    exit(1);
+  }
   return 0;
 }

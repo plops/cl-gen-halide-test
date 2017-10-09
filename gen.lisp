@@ -3,6 +3,8 @@
 
 (in-package :cl-cpp-generator)
 
+(push :cxxopts *features*)
+
 (defmacro e (&body body)
   `(statements (<< "std::cout" ,@(loop for e in body collect
                                       (cond ((stringp e) `(string ,e))
@@ -102,19 +104,21 @@ is replaced with replacement."
 			    (with-compilation-unit 
 				#+cxxopts (raw "try")
 			      (let (#+cxxopts (options :type "cxxopts::Options" :ctor (comma-list (string "drm_draw") (string "draw to drm device"))))
-				#+cxxopts (with-compilation-unit
-				    (raw "options.add_options()")
-				  (raw "(\"h,help\", \"Print help\")")
-				 ; (raw "(\"d,device\",\"device file\",cxxopts::value<std::string>()->default_value(\"/dev/dri/card0\"))")
+				#+cxxopts
+				(statements
+				 (with-compilation-unit
+				     (raw "options.add_options()")
+				   (raw "(\"h,help\", \"Print help\")")
+					; (raw "(\"d,device\",\"device file\",cxxopts::value<std::string>()->default_value(\"/dev/dri/card0\"))")
 					; (raw "(\"r,rate\",\"frame rate (Hz,double)\",cxxopts::value<double>()->default_value(\"60.0\"))")
-				  (raw ";")
+				   (raw ";"))
 				  
-				  (funcall options.parse argc argv)
+				   (funcall options.parse argc argv)
 				  
-				  (if (funcall options.count (string "help"))
-				      (statements
-				       (macroexpand (e (funcall options.help)))
-				       (funcall exit 0))))
+				   (if (funcall options.count (string "help"))
+				       (statements
+					(macroexpand (e (funcall options.help)))
+					(funcall exit 0))))
 				
 				)
 			      
