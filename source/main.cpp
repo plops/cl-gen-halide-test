@@ -49,14 +49,15 @@ public:
 
   MyPipeline(Buffer<uint8_t> in) : input(in) {
     lut(i) = cast<uint8_t>(
-        clamp(((2.55e+2f) * pow((i * (3.921569e-3f)), 1.2f)), 0, 255));
+        clamp(((2.55e+2f) * pow((cast<float>(i) / (2.55e+2f)), 1.2f)),
+              (0.0e+0f), (2.55e+2f)));
     padded(x, y, c) = input(clamp(x, 0, (input.width() - 1)),
                             clamp(y, 0, (input.height() - 1)), c);
     p16(x, y, c) = cast<uint16_t>(padded(x, y, c));
     sharpen(x, y, c) =
-        ((2 * p16(x, y, c)) -
-         ((2.5e-1f) * (p16((x - 1), y, c) + p16(x, (y - 1), c) +
-                       p16((x + 1), y, c) + p16(x, (y + 1), c))));
+        ((2 * p16(x, y, c)) - ((p16((x - 1), y, c) + p16(x, (y - 1), c) +
+                                p16((x + 1), y, c) + p16(x, (y + 1), c)) /
+                               4));
     curved(x, y, c) = lut(sharpen(x, y, c));
   }
   void schedule_for_cpu() {

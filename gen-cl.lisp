@@ -121,10 +121,10 @@ is replaced with replacement."
 				      clamp
 				      (* 255f0
 					 (funcall pow
-						  (* i #. (/ 255.0f0))
+						  (/ (funcall cast<float> i) 255.0f0)
 						  1.2f))
-				      0
-				      255)))
+				      0f0
+				      255f0)))
 				   (setf (funcall padded x y c)
 					 (funcall
 					  input
@@ -142,11 +142,12 @@ is replaced with replacement."
 				   (setf (funcall sharpen x y c)
 					 (-
 					  (* 2 (funcall p16 x y c))
-					  (* .25
+					  (/
 					       (+ (funcall p16 (- x 1) y c)
 						  (funcall p16 x (- y 1) c)
 						  (funcall p16 (+ x 1) y c)
-						  (funcall p16 x (+ y 1) c)))))
+						  (funcall p16 x (+ y 1) c))
+					       4)))
 				   (setf (funcall curved x y c)
 					 (funcall
 					  lut
