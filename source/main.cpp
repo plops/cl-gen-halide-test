@@ -53,7 +53,7 @@ public:
     padded(x, y, c) = input(clamp(x, 0, (input.width() - 1)),
                             clamp(y, 0, (input.height() - 1)), c);
     p16(x, y, c) = cast<uint16_t>(padded(x, y, c));
-    sharpen(x, y, z) =
+    sharpen(x, y, c) =
         ((2 * p16(x, y, c)) -
          ((2.5e-1f) * (p16((x - 1), y, c) + p16(x, (y - 1), c) +
                        p16((x + 1), y, c) + p16(x, (y + 1), c))));

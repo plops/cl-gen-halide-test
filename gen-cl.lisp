@@ -139,7 +139,7 @@ is replaced with replacement."
 					 (funcall
 					  cast<uint16_t>
 					  (funcall padded x y c)))
-				   (setf (funcall sharpen x y z)
+				   (setf (funcall sharpen x y c)
 					 (-
 					  (* 2 (funcall p16 x y c))
 					  (* .25
@@ -189,11 +189,11 @@ is replaced with replacement."
 				      lut
 				      (funcall gpu_blocks block)
 				      (funcall gpu_threads thread))
-				     (statements (slot-value
-				       curved
-				       (funcall reorder c x y)
-				       (funcall bound c 0 3)
-				       (funcall unroll c)))
+				     (slot-value
+				      curved
+				      (funcall reorder c x y)
+				      (funcall bound c 0 3)
+				      (funcall unroll c))
 				     (funcall curved.gpu_tile
 					      x y xo yo xi yi 8 8)
 				     (funcall padded.compute_at
