@@ -1,5 +1,13 @@
 //! \file main.cpp
+// g++ main.cpp -g -std=c++11 -I /usr/local/share/halide -I
+// /usr/local/share/halide/tools -I /usr/local/share/halide/tutorial -I
+// /usr/local/include -L /usr/local/lib -lHalide `libpng-config --cflags
+// --ldflags` -ljpeg -lpthread -ldl -o main
 #include "Halide.h"
+using namespace Halide;
+#include "halide_image_io.h"
+using namespace Halide::Tools;
+#include "clock.h"
 #include <array>
 #include <iostream>
 
@@ -21,6 +29,7 @@
 //! 1. http://halide-lang.org/tutorials/tutorial_lesson_12_using_the_gpu.html
 Var x;
 Var y;
+Var z;
 Var c;
 Var i;
 Var ii;
@@ -119,8 +128,7 @@ public:
 
 int main(int argc, char **argv) {
   {
-    Buffer<uint8_t> input = load_image(not processable
-                                       : (str images / rgb.png));
+    Buffer<uint8_t> input = load_image("images/rgb.png");
     MyPipeline p2(input);
     p2.schedule_for_gpu();
     p2.test_performance();

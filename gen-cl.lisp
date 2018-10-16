@@ -55,9 +55,14 @@ is replaced with replacement."
   (let* ((code `(with-compilation-unit
 		    (with-compilation-unit
 			(raw "//! \\file main.cpp "))
+		  (raw "// g++ main.cpp -g -std=c++11 -I /usr/local/share/halide -I /usr/local/share/halide/tools -I /usr/local/share/halide/tutorial -I /usr/local/include -L /usr/local/lib -lHalide `libpng-config --cflags --ldflags` -ljpeg -lpthread -ldl -o main")
 		  (include "Halide.h")
 
-		  
+		  (raw "using namespace Halide;")
+
+		  (include "halide_image_io.h")
+		  (raw "using namespace Halide::Tools;")
+		  (include "clock.h")
 		  #+cxxopts (include "cxxopts.hpp")
 		  (include <iostream>)
 		  (include <array>)
@@ -88,6 +93,7 @@ is replaced with replacement."
 
 		  (decl ((x :type Var)
 			 (y :type Var)
+			 (z :type Var)
 			 (c :type Var)
 			 (i :type Var)
 			 (ii :type Var)
@@ -238,7 +244,7 @@ is replaced with replacement."
 
 			    (let ((input :type Buffer<uint8_t> :init
 					 (funcall load_image
-						  (str "images/rgb.png")))
+						  (string "images/rgb.png")))
 				  (p2 :type MyPipeline
 				      :ctor input))
 			      (funcall p2.schedule_for_gpu)
