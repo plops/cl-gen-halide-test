@@ -20,16 +20,37 @@
 
 //! \section References
 //! 1. http://halide-lang.org/tutorials/tutorial_lesson_12_using_the_gpu.html
+Var x;
+Var y;
+Var c;
+Var i;
+Var ii;
+Var xo;
+Var yo;
+Var xi;
+Var yi;
+
 class MyPipeline {
 public:
   Func lut;
   Func padded;
-  Func padded16;
+  Func p16;
   Func sharpen;
   Func curved;
   Buffer<uint8_t> input;
 
-  MyPipeline(Buffer<uint8_t> in) : input(in);
+  MyPipeline(Buffer<uint8_t> in) : input(in) {
+    lut(i) = cast<uint8_t>(
+        clamp(((2.55e+2f) * pow((i * (3.921569e-3f)), 1.2f)), 0, 255));
+    padded(x, y, c) = input(clamp(x, 0, (input.width() - 1)),
+                            clamp(y, 0, (input.height() - 1)), c);
+    p16(x, y, c) = cast<uint16_t>(padded(x, y, c));
+    sharpen(x, y, z) =
+        ((2 * p16(x, y, c)) -
+         ((2.5e-1f) * (p16((x - 1), y, c) + p16(x, (y - 1), c) +
+                       p16((x + 1), y, c) + p16(x, (y + 1), c))));
+    curved(x, y, c) = lut(sharpen(x, y, c));
+  }
 };
 
 //! @brief main function

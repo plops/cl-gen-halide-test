@@ -86,17 +86,65 @@ is replaced with replacement."
 		       collect
 			 `(raw ,(format nil "//! ~a. ~a" i e)))
 
-		  
+		  (decl ((x :type Var)
+			 (y :type Var)
+			 (c :type Var)
+			 (i :type Var)
+			 (ii :type Var)
+			 (xo :type Var)
+			 (yo :type Var)
+			 (xi :type Var)
+			 (yi :type Var))
+			)
 		  (class MyPipeline ()
 			 (access-specifier public)
 			 (decl ((lut :type Func)
 			       (padded :type Func)
-			       (padded16 :type Func)
+			       (p16 :type Func)
 			       (sharpen :type Func)
 			       (curved :type Func)
-			       (input :type Buffer<uint8_t>))
-			       )
-			 (function ( MyPipeline ((in :type Buffer<uint8_t>)) nil :ctor ((input in)))))
+			       (input :type Buffer<uint8_t>)))
+			 (function (MyPipeline ((in :type Buffer<uint8_t>))
+					       nil
+					       :ctor ((input in)))
+				   (setf
+				    (funcall lut i)
+				    (funcall
+				     cast<uint8_t>
+				     (funcall
+				      clamp
+				      (* 255f0
+					 (funcall pow
+						  (* i #. (/ 255.0f0))
+						  1.2f))
+				      0
+				      255)))
+				   (setf (funcall padded x y c)
+					 (funcall
+					  input
+					  (funcall
+					   clamp x 0
+					   (- (funcall input.width) 1))
+					  (funcall
+					   clamp y 0
+					   (- (funcall input.height) 1))
+					  c))
+				   (setf (funcall p16 x y c)
+					 (funcall
+					  cast<uint16_t>
+					  (funcall padded x y c)))
+				   (setf (funcall sharpen x y z)
+					 (-
+					  (* 2 (funcall p16 x y c))
+					  (* .25
+					       (+ (funcall p16 (- x 1) y c)
+						  (funcall p16 x (- y 1) c)
+						  (funcall p16 (+ x 1) y c)
+						  (funcall p16 x (+ y 1) c)))))
+				   (setf (funcall curved x y c)
+					 (funcall
+					  lut
+					  (funcall sharpen x y c)))))
 		  ,@(dox :brief "main function"
 			 :usage "parse command line parameters and draw to screen"
 			 :params '((argc "input number of command line arguments")
