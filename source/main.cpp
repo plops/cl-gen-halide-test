@@ -51,6 +51,10 @@ public:
                        p16((x + 1), y, c) + p16(x, (y + 1), c))));
     curved(x, y, c) = lut(sharpen(x, y, c));
   }
+  void schedule_for_cpu() {
+    lut.compute_root();
+    curved.reorder(c, x, y).bound(c, 0, 3).unroll(c)
+  }
 };
 
 //! @brief main function

@@ -144,7 +144,17 @@ is replaced with replacement."
 				   (setf (funcall curved x y c)
 					 (funcall
 					  lut
-					  (funcall sharpen x y c)))))
+					  (funcall sharpen x y c))))
+			 (function (schedule_for_cpu () void)
+				   (funcall lut.compute_root)
+				   (slot-value
+				    curved
+				    (funcall
+				     reorder c x y)
+				    (funcall bound c 0 3)
+				    (funcall unroll c))
+				   ))
+   
 		  ,@(dox :brief "main function"
 			 :usage "parse command line parameters and draw to screen"
 			 :params '((argc "input number of command line arguments")
