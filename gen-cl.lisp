@@ -153,7 +153,57 @@ is replaced with replacement."
 				     reorder c x y)
 				    (funcall bound c 0 3)
 				    (funcall unroll c))
-				   ))
+				   (let ((yo :type Var)
+					 (yi :type Var))
+				     (slot-value
+				      curved
+				      (funcall split y yo yi 16)
+				      (funcall parallel yo))
+				     (slot-value
+				      sharpen
+				      (funcall compute_at curved yi))
+				     (funcall sharpen.vectorize x 8)
+				     (slot-value
+				      padded
+				      (funcall store_at curved yo)
+				      (funcall compute_at curved yi))
+				     (slot-value
+				      padded
+				      (funcall vectorize x 16))
+				     (slot-value
+				      curved
+				      (funcall compile_jit)))
+				   )
+			 (function (schedule_for_gpu () void)
+				   (funcall lut.compute_root)
+				   (let ((block :type Var)
+					 (thread :type Var))
+				     (funcall lut.split i block thread 16)
+				     (slot-value
+				      lut
+				      (funcall gpu_blocks block)
+				      (funcall gpu_threads thread))
+				     (slot-value
+				      curved
+				      (funcall reorder c x y)
+				      (funcall bound c 0 3)
+				      (funcall unroll c))
+				     (funcall curved.gpu_tile
+					      x y xo yo xi yi 8 8)
+				     (funcall padded.compute_at
+					      curved xo)
+				     (funcall padded.gpu_threads x y)
+				     (let ((target
+					    :type Target
+					    :init (funcall get_host_target)))
+				       (funcall target.set_feature
+						"Target::OpenCL")
+				       (funcall target.set_feature
+						"Target::Debug")
+				       )
+				     (slot-value
+				      curved
+				      (funcall compile_jit)))))
    
 		  ,@(dox :brief "main function"
 			 :usage "parse command line parameters and draw to screen"
