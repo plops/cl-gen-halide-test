@@ -18,14 +18,14 @@ set ( CMAKE_CXX_COMPILER  g++)
 
 # for gcc:
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math -fext-numeric-literals -fpermissive -march=native -mtune=native -O2 -std=c++17 -Werror -Wall -Wdouble-promotion  -Wduplicated-cond -Wformat -Wformat=2  -Wlogical-op -Wnull-dereference    -L/home/martin/big/halide/bin -lHalide -Wl,-rpath=/home/martin/big/halide/bin ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math -fext-numeric-literals -fpermissive -march=native -mtune=native -O2 -std=c++17 -Werror -Wall -Wdouble-promotion  -Wduplicated-cond -Wformat -Wformat=2  -Wlogical-op -Wnull-dereference    -L/usr/local/bin -lHalide -Wl,-rpath=/usr/local/bin ")
 # -Wduplicated-branches -Wrestrict -Wjump-misses-init -Wold-style-cast -Werror=shadow  -Wuseless-cast
 
 
 add_executable(halide_test main.cpp)
 target_compile_features(halide_test PUBLIC PRIVATE cxx_lambdas cxx_range_for)
 
-target_include_directories(halide_test PUBLIC "/home/martin/big/halide/include/")
+target_include_directories(halide_test PUBLIC "/usr/local/include/")
 #target_link_libraries(drm_draw "/home/martin/libbla.a")
 
 #find_library(halide_lib Halide)

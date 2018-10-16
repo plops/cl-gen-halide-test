@@ -19,12 +19,18 @@
 //!   + doxygen
 
 //! \section References
-//! 1. https://www.youtube.com/watch?v=dnFccCGvT90 Jonathan Ragan-Kelley at
-//! Microsoft Research (good discussion in the end)
-//! 2. https://www.youtube.com/watch?v=WvzlaRpmtVk Jonathan Ragan-Kelley CVPR
-//! Tutorial
-//! 3. https://www.youtube.com/watch?v=PTSVlT3Iq4U Dan Tull Live Coding
-//! 4. https://www.youtube.com/watch?v=3uiEyEKji0M Andrew Adams Introduction
+//! 1. http://halide-lang.org/tutorials/tutorial_lesson_12_using_the_gpu.html
+class MyPipeline {
+public:
+  Func lut;
+  Func padded;
+  Func padded16;
+  Func sharpen;
+  Func curved;
+  Buffer<uint8_t> input;
+
+  MyPipeline(Buffer<uint8_t> in) : input(in);
+};
 
 //! @brief main function
 //!
