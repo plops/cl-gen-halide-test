@@ -61,13 +61,16 @@ public:
   }
   void schedule_for_cpu() {
     lut.compute_root();
-    curved.reorder(c, x, y).bound(c, 0, 3).unroll(c) {
+    {
       Var yo;
       Var yi;
-      curved.split(y, yo, yi, 16)
-          .parallel(yo) sharpen.compute_at(curved, yi) sharpen.vectorize(x, 8);
-      padded.store_at(curved, yo)
-          .compute_at(curved, yi) padded.vectorize(x, 16) curved.compile_jit()
+      curved.reorder(c, x, y).bound(c, 0, 3).unroll(c);
+      curved.split(y, yo, yi, 16).parallel(yo);
+      sharpen.compute_at(curved, yi);
+      sharpen.vectorize(x, 8);
+      padded.store_at(curved, yo).compute_at(curved, yi);
+      padded.vectorize(x, 16);
+      curved.compile_jit();
     }
   }
   void schedule_for_gpu() {
@@ -76,10 +79,9 @@ public:
       Var block;
       Var thread;
       lut.split(i, block, thread, 16);
-      lut.gpu_blocks(block)
-          .gpu_threads(thread) curved.reorder(c, x, y)
-          .bound(c, 0, 3)
-          .unroll(c) curved.gpu_tile(x, y, xo, yo, xi, yi, 8, 8);
+      lut.gpu_blocks(block).gpu_threads(thread);
+      curved.reorder(c, x, y).bound(c, 0, 3).unroll(c);
+      curved.gpu_tile(x, y, xo, yo, xi, yi, 8, 8);
       padded.compute_at(curved, xo);
       padded.gpu_threads(x, y);
       {
@@ -87,7 +89,7 @@ public:
         target.set_feature(Target::OpenCL);
         target.set_feature(Target::Debug);
       }
-      curved.compile_jit()
+      curved.compile_jit();
     }
   }
   void test_performance() {

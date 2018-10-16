@@ -153,14 +153,16 @@ is replaced with replacement."
 					  (funcall sharpen x y c))))
 			 (function (schedule_for_cpu () void)
 				   (funcall lut.compute_root)
-				   (slot-value
-				    curved
-				    (funcall
-				     reorder c x y)
-				    (funcall bound c 0 3)
-				    (funcall unroll c))
+				   
 				   (let ((yo :type Var)
 					 (yi :type Var))
+				     (statements
+				      (slot-value
+				       curved
+				       (funcall
+					reorder c x y)
+				       (funcall bound c 0 3)
+				       (funcall unroll c)))
 				     (slot-value
 				      curved
 				      (funcall split y yo yi 16)
@@ -176,9 +178,7 @@ is replaced with replacement."
 				     (slot-value
 				      padded
 				      (funcall vectorize x 16))
-				     (slot-value
-				      curved
-				      (funcall compile_jit)))
+				     (funcall curved.compile_jit))
 				   )
 			 (function (schedule_for_gpu () void)
 				   (funcall lut.compute_root)
@@ -189,11 +189,11 @@ is replaced with replacement."
 				      lut
 				      (funcall gpu_blocks block)
 				      (funcall gpu_threads thread))
-				     (slot-value
-				      curved
-				      (funcall reorder c x y)
-				      (funcall bound c 0 3)
-				      (funcall unroll c))
+				     (statements (slot-value
+				       curved
+				       (funcall reorder c x y)
+				       (funcall bound c 0 3)
+				       (funcall unroll c)))
 				     (funcall curved.gpu_tile
 					      x y xo yo xi yi 8 8)
 				     (funcall padded.compute_at
@@ -207,10 +207,7 @@ is replaced with replacement."
 				       (funcall target.set_feature
 						"Target::Debug")
 				       )
-				     (slot-value
-				      curved
-				      (funcall compile_jit)))
-				   )
+				     (funcall curved.compile_jit)))
 			 (function
 			  (test_performance () void)
 			  (let (((funcall output
