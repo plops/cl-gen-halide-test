@@ -3,7 +3,7 @@
 
 (in-package :cl-cpp-generator)
 
-(push :cxxopts *features*)
+;(push :cxxopts *features*)
 
 (defmacro e (&body body)
   `(statements (<< "std::cout" ,@(loop for e in body collect
@@ -203,7 +203,29 @@ is replaced with replacement."
 				       )
 				     (slot-value
 				      curved
-				      (funcall compile_jit)))))
+				      (funcall compile_jit)))
+				   )
+			 (function
+			  (test_performance () void)
+			  (let (((funcall output
+					  (funcall input.width)
+					  (funcall input.height)
+					  (funcall input.channels)
+					  ) :type Buffer<uint8_t>))
+			    (funcall curved.realize output)
+			    (let ((best_time :init 0d0))
+			     (dotimes (i 3)
+			       (let ((t1 :init (funcall current_time)))
+				 (dotimes (j 100)
+				   (funcall curved.realize output))
+				 (funcall output.copy_to_host)
+				 (let ((t2 :init (funcall current_time))
+				       (elapsed :init (/ (- t2 t1) 100d0)))
+				   (if (|\|\|| (== i 0)
+					   (< elapsed best_time))
+				       (setf best_time elapsed))
+				   ))))))
+			 )
    
 		  ,@(dox :brief "main function"
 			 :usage "parse command line parameters and draw to screen"
@@ -214,48 +236,13 @@ is replaced with replacement."
 		  (function (main ((argc :type int)
 				   (argv :type char**)) int)
 
-			    
-			    
-			    
-			    (with-compilation-unit 
-				#+cxxopts (raw "try")
-			      (let (#+cxxopts (options :type "cxxopts::Options" :ctor (comma-list (string "drm_draw") (string "draw to drm device"))))
-				#+cxxopts
-				(statements
-				 (with-compilation-unit
-				     (raw "options.add_options()")
-				   (raw "(\"h,help\", \"Print help\")")
-					; (raw "(\"d,device\",\"device file\",cxxopts::value<std::string>()->default_value(\"/dev/dri/card0\"))")
-					; (raw "(\"r,rate\",\"frame rate (Hz,double)\",cxxopts::value<double>()->default_value(\"60.0\"))")
-				   (raw ";"))
-				  
-				   (funcall options.parse argc argv)
-				  
-				   (if (funcall options.count (string "help"))
-				       (statements
-					(macroexpand (e (funcall options.help)))
-					(funcall exit 0))))
-				(let ((gradient :type "Halide::Func")
-				      (x :type "Halide::Var")
-				      (y :type "Halide::Var")
-				      (e :type "Halide::Expr" :ctor (+ x y))
-				      )
-				  (setf (funcall gradient x y) e)
-				  (let ((output :type "Halide::Buffer<int32_t>"
-						:ctor (funcall gradient.realize 800 600)))
-				    (for ((j 0 :type int) (< j (funcall output.height)) j++)
-				      (for ((i 0 :type int) (< i (funcall output.width)) i++)
-					(if (!= (+ i j) (funcall output i j))
-					    (statements
-					     (macroexpand (er "error, expected " (+ i j)
-							      " but result is " (funcall output i j)))))))))
-				)
-			      
-			      #+cxxopts (raw "catch (const cxxopts::OptionException& e)")
-			      #+cxxopts (let ()
-				(macroexpand (e "error parsing options: " (funcall e.what)))
-				(funcall exit 1)))
-			    
+			    (let ((input :type Buffer<uint8_t> :init
+					 (funcall load_image
+						  (str "images/rgb.png")))
+				  (p2 :type MyPipeline
+				      :ctor input))
+			      (funcall p2.schedule_for_gpu)
+			      (funcall p2.test_performance))
 			    (return 0)))))
     (write-source "stage/cl-gen-halide-test/source/main" "cpp" code)))
 
