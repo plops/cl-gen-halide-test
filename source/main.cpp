@@ -1,14 +1,18 @@
 //! \file main.cpp
-// g++ main.cpp -g -std=c++11 -I /usr/local/share/halide -I
-// /usr/local/share/halide/tools -I /usr/local/share/halide/tutorial -I
-// /usr/local/include -L /usr/local/lib -lHalide `libpng-config --cflags
-// --ldflags` -ljpeg -lpthread -ldl -o main
+// compile gradient-halide with
+// pacman -S openblas eigen
+// export HL_DEBUG_CODEGEN=1; export HL_TARGET=host-opencl; cmake
+// -DCMAKE_BUILD_TYPE=Release -DOpenGL_GL_PREFERENCE=GLVND .. g++ main.cpp -g
+// -std=c++11 -I /usr/local/share/halide -I /usr/local/share/halide/tools -I
+// /usr/local/share/halide/tutorial -I /usr/local/include -L /usr/local/lib
+// -lHalide `libpng-config --cflags --ldflags` -ljpeg -lpthread -ldl -o main
 #include "Halide.h"
 using namespace Halide;
 #include "halide_image_io.h"
 using namespace Halide::Tools;
 #include "clock.h"
 #include <array>
+#include <dlfcn.h>
 #include <iostream>
 
 //! \mainpage test halide
@@ -27,6 +31,7 @@ using namespace Halide::Tools;
 
 //! \section References
 //! 1. http://halide-lang.org/tutorials/tutorial_lesson_12_using_the_gpu.html
+//! 2. https://github.com/halide/Halide/wiki/Debugging-Tips
 Var x;
 Var y;
 Var z;
@@ -87,7 +92,7 @@ public:
       padded.gpu_threads(x, y);
       {
         Target target = get_host_target();
-        target.set_feature(Target::OpenCL);
+        target.with_feature(Target::OpenGL);
         target.set_feature(Target::Debug);
       }
       curved.compile_jit();
@@ -120,6 +125,9 @@ public:
   }
 };
 
+bool have_opencl_or_metal();
+bool load_opencl() { return (NULL != dlopen("libOpenCL.so", RTLD_LAZY)); }
+
 //! @brief main function
 //!
 //! @usage parse command line parameters and draw to screen
@@ -130,6 +138,9 @@ public:
 //! @return Integer
 
 int main(int argc, char **argv) {
+  if ((!(load_opencl()))) {
+    write(1, "error", 5);
+  }
   {
     Buffer<uint8_t> input = load_image("images/rgb.png");
     MyPipeline p2(input);

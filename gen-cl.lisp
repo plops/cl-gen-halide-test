@@ -55,7 +55,10 @@ is replaced with replacement."
   (let* ((code `(with-compilation-unit
 		    (with-compilation-unit
 			(raw "//! \\file main.cpp "))
-		  (raw "// g++ main.cpp -g -std=c++11 -I /usr/local/share/halide -I /usr/local/share/halide/tools -I /usr/local/share/halide/tutorial -I /usr/local/include -L /usr/local/lib -lHalide `libpng-config --cflags --ldflags` -ljpeg -lpthread -ldl -o main")
+		  (raw "// compile gradient-halide with")
+		  (raw "// pacman -S openblas eigen")
+		  (raw "// export HL_DEBUG_CODEGEN=1; export HL_TARGET=host-opencl;export HL_JIT_TARGET=host-opencl; cmake -DCMAKE_BUILD_TYPE=Release -DOpenGL_GL_PREFERENCE=GLVND ..")
+		  (raw "// g++ main.cpp -g -std=c++11 -I /usr/local/share/halide -I /usr/local/share/halide/tools -I /usr/local/share/halide/tutorial -I /usr/local/include -L /usr/local/lib -lHalide `libpng-config --cflags --ldflags` -ljpeg -lpthread -ldl -o main -Wl,-rpath=/usr/local/lib")
 		  (include "Halide.h")
 
 		  (raw "using namespace Halide;")
@@ -63,6 +66,7 @@ is replaced with replacement."
 		  (include "halide_image_io.h")
 		  (raw "using namespace Halide::Tools;")
 		  (include "clock.h")
+		  (include <dlfcn.h>)
 		  #+cxxopts (include "cxxopts.hpp")
 		  (include <iostream>)
 		  (include <array>)
@@ -87,7 +91,7 @@ is replaced with replacement."
 		  (raw "//! \\section References ")
 		  ,@(loop for i from 1 and e in
 			 '("http://halide-lang.org/tutorials/tutorial_lesson_12_using_the_gpu.html"
-		)
+			   "https://github.com/halide/Halide/wiki/Debugging-Tips")
 		       collect
 			 `(raw ,(format nil "//! ~a. ~a" i e)))
 
@@ -203,8 +207,8 @@ is replaced with replacement."
 				     (let ((target
 					    :type Target
 					    :init (funcall get_host_target)))
-				       (funcall target.set_feature
-						"Target::OpenCL")
+				       (funcall target.with_feature
+						"Target::OpenGL")
 				       (funcall target.set_feature
 						"Target::Debug")
 				       )
@@ -230,7 +234,13 @@ is replaced with replacement."
 				       (setf best_time elapsed))
 				   ))))))
 			 )
-   
+
+		  (raw "bool have_opencl_or_metal();")
+		  (function (load_opencl () bool)
+			    (return (!= NULL
+					(funcall dlopen
+						 (string "libOpenCL.so")
+						 RTLD_LAZY))))
 		  ,@(dox :brief "main function"
 			 :usage "parse command line parameters and draw to screen"
 			 :params '((argc "input number of command line arguments")
@@ -239,7 +249,8 @@ is replaced with replacement."
 		  		  
 		  (function (main ((argc :type int)
 				   (argv :type char**)) int)
-
+			    (if (! (funcall load_opencl))
+				(funcall write 1 (string "error") 5))
 			    (let ((input :type Buffer<uint8_t> :init
 					 (funcall load_image
 						  (string "images/rgb.png")))
