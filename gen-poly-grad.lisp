@@ -121,8 +121,7 @@ is replaced with replacement."
 				  (r :type RDom :ctor (comma-list 0 order))
 				  (r_flipped :type Expr
 					     :init (- 1 r))
-				  (exact_sin :type Func
-					     :init (funcall sin fx)))
+				  (exact_sin :type Func))
 			      (setf (funcall approx_sin x y)
 				    (funcall cast<double> 0.0)
 				    (funcall approx_sin x r_flipped)
@@ -131,23 +130,25 @@ is replaced with replacement."
 				     (* (funcall approx_sin
 						 x
 						 (+ 1 r_flipped))
-					fx)))
-			      (let ((err
-				     :type Func
-				     :init
-				     (funcall pow
+					fx))
+				    (funcall exact_sin x)
+				    (funcall sin fx))
+			      (let ((err :type Func))
+				(setf (funcall err x)
+				      (funcall pow
 					      (/ (-
 						  (funcall approx_sin x 0)
 						  (funcall exact_sin x))
 						 (funcall exact_sin x))
-					      2))
-				    (d :type RDom
-				       :ctor (comma-list 1 (- samples 1)))
-				    (avg_err :type Func
-					     :init
-					     (/ (funcall sum
-							 (funcall err d))
-						samples))))
+					      2)
+				      )
+				(let ((d :type RDom
+					 :ctor (comma-list 1 (- samples 1)))
+				      (avg_err :type Func))
+				  (setf (funcall avg_err)
+					(/ (funcall sum
+						    (funcall err d))
+					   samples))))
 			      )))))
     (write-source "stage/cl-gen-halide-test/source/main" "cpp" code)))
 

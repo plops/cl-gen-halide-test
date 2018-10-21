@@ -51,14 +51,19 @@ int main(int argc, char **argv) {
     Expr fx = ((x / cast<double>(samples)) * Expr((1.5707963267948966e+0)));
     RDom r(0, order);
     Expr r_flipped = (1 - r);
-    Func exact_sin = sin(fx);
+    Func exact_sin;
     approx_sin(x, y) = cast<double>((0.0e+0f));
     approx_sin(x, r_flipped) =
         ((fx * coeffs(r_flipped)) + (approx_sin(x, (1 + r_flipped)) * fx));
+    exact_sin(x) = sin(fx);
     {
-      Func err = pow(((approx_sin(x, 0) - exact_sin(x)) / exact_sin(x)), 2);
-      RDom d(1, (samples - 1));
-      Func avg_err = (sum(err(d)) / samples);
+      Func err;
+      err(x) = pow(((approx_sin(x, 0) - exact_sin(x)) / exact_sin(x)), 2);
+      {
+        RDom d(1, (samples - 1));
+        Func avg_err;
+        avg_err() = (sum(err(d)) / samples);
+      }
     }
   }
 }
