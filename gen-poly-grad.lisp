@@ -148,7 +148,69 @@ is replaced with replacement."
 				  (setf (funcall avg_err)
 					(/ (funcall sum
 						    (funcall err d))
-					   samples))))
+					   samples))
+				  (let ((d_err_d :init
+					  (funcall propagate_adjoints
+						   avg_err))
+					(new_coeffs :type Func))
+				    (setf (funcall new_coeffs x)
+					  (- (funcall coeffs x)
+					     (* learning_rate
+						(funcall 
+						 (funcall d_err_d coeffs)
+						 x))
+					     ))
+				    (slot-value
+				     err
+				     (funcall compute_root)
+				     (funcall vectorize x 4))
+				    (slot-value
+				     new_coeffs
+				     (funcall compute_root)
+				     (funcall vectorize x 4))
+				    (slot-value
+				     approx_sin
+				     (funcall compute_root)
+				     (funcall vectorize x 4)
+				     (funcall update)
+				     (funcall vectorize x 4))
+				    (slot-value
+				     avg_err
+				     (funcall compute_root))
+				    (let ((v :type Var)
+					  ((aref fs) :type Func
+					   :init (list coeffs
+						       approx_sin
+						       err)))
+				      (for-range (f fs)
+					(let ((first :type bool
+						     :init true))
+					  (for-range (df
+						      (funcall
+						       d_err_d.funcs f))
+						     (if first
+							 (statements
+							   (setf first false)
+							   (raw continue)))
+						     (slot-value
+						      df
+						      (funcall compute_root)
+						      (funcall vectorize
+							       (aref (funcall df.args) 0) 4))
+						     (dotimes (i (funcall df.num_update_definitions))
+						       (for-range (d
+								   (slot-value df
+										(funcall update i)
+										(funcall get_schedule)
+										(funcall dims)))
+								  (if (funcall d.is_pure)
+								      (statements
+								       (slot-value df
+										   (funcall update i)
+										   (funcall vectorize (funcall Var d.var)
+											    4)
+										   )
+								       (raw break))))))))))))
 			      )))))
     (write-source "stage/cl-gen-halide-test/source/main" "cpp" code)))
 

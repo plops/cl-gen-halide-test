@@ -63,6 +63,40 @@ int main(int argc, char **argv) {
         RDom d(1, (samples - 1));
         Func avg_err;
         avg_err() = (sum(err(d)) / samples);
+        {
+          auto d_err_d = propagate_adjoints(avg_err);
+          Func new_coeffs;
+          new_coeffs(x) = (coeffs(x) - (learning_rate * d_err_d(coeffs)(x)));
+          err.compute_root().vectorize(x, 4);
+          new_coeffs.compute_root().vectorize(x, 4);
+          approx_sin.compute_root().vectorize(x, 4).update().vectorize(x, 4);
+          avg_err.compute_root();
+          {
+            Var v;
+            Func fs[] = {coeffs, approx_sin, err};
+            for (auto f : fs) {
+              {
+                bool first = true;
+                for (auto df : d_err_d.funcs(f)) {
+                  if (first) {
+                    first = false;
+                    continue;
+                  }
+                  df.compute_root().vectorize((funcall df.args)[0], 4);
+                  for (unsigned int i = 0; (i < df.num_update_definitions());
+                       i += 1) {
+                    for (auto d : df.update(i).get_schedule().dims()) {
+                      if (d.is_pure()) {
+                        df.update(i).vectorize(Var(d.var), 4);
+                        break;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
