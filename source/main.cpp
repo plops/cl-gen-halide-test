@@ -133,6 +133,17 @@ int main(int argc, char **argv) {
                         }
                       }
                     }
+                    {
+                      double final_error = e();
+                      if (((final_error <= (1.e-10f)) &&
+                           (final_error < initial_error))) {
+                        printf("Success!\n");
+                        return 0;
+                      } else {
+                        printf("Did not converge\n");
+                        return -1;
+                      }
+                    }
                   }
                 }
               }

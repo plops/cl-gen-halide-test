@@ -248,10 +248,16 @@ is replaced with replacement."
 					 (if should_print
 					     (funcall printf (string "Error: %g\\n") (funcall e)))
 					 (if (== 0 i)
-					     (setf initial_error (funcall e))))))))
-			       )
-			     
-			     )))))))))
+					     (setf initial_error (funcall e)))))
+				     (let ((final_error :type double :init (funcall e)))
+				       (if (&& (<= final_error 1e-10)
+					       (< final_error initial_error))
+					   (statements
+					    (funcall printf (string "Success!\\n"))
+					    (return 0))
+					   (statements
+					    (funcall printf (string "Did not converge\\n"))
+					    (return -1)))))))))))))))))
   (write-source "stage/cl-gen-halide-test/source/main" "cpp" code))
 
 
