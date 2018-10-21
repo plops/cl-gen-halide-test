@@ -207,9 +207,9 @@ is replaced with replacement."
 				     (let ((target
 					    :type Target
 					    :init (funcall get_host_target)))
-				       (funcall target.with_feature
-						"Target::OpenGL")
 				       (funcall target.set_feature
+						"Target::OpenCL")
+				       #+nil  (funcall target.set_feature
 						"Target::Debug")
 				       )
 				     (funcall curved.compile_jit)))
@@ -242,7 +242,7 @@ is replaced with replacement."
 						 (string "libOpenCL.so")
 						 RTLD_LAZY))))
 		  ,@(dox :brief "main function"
-			 :usage "parse command line parameters and draw to screen"
+			 :usage ""
 			 :params '((argc "input number of command line arguments")
 				   (argv "input"))
 			 :return "Integer")
