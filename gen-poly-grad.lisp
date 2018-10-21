@@ -233,7 +233,16 @@ is replaced with replacement."
 								(== 0 i)
 								(== (/ steps 2) i)
 								)
-							       (== steps i))))))
+							       (== steps i))))
+					    (if should_print
+						(statements
+						 (funcall printf
+							  (string "Iteration %d\\nCoefficients: ")
+							  i)
+						 (dotimes (j terms)
+						   (funcall printf (string "%g ")
+							    (funcall c j)))
+						 (funcall printf (string "\\n"))))))
 				       )))))
 			      )))))
     (write-source "stage/cl-gen-halide-test/source/main" "cpp" code)))

@@ -120,6 +120,13 @@ int main(int argc, char **argv) {
                 {
                   bool should_print =
                       (((0 == i) || ((steps / 2) == i)) || (steps == i));
+                  if (should_print) {
+                    printf("Iteration %d\nCoefficients: ", i);
+                    for (unsigned int j = 0; (j < terms); j += 1) {
+                      printf("%g ", c(j));
+                    }
+                    printf("\n");
+                  }
                 }
               }
             }
