@@ -196,7 +196,7 @@ is replaced with replacement."
 						      df
 						      (funcall compute_root)
 						      (funcall vectorize
-							       (aref (funcall df.args) 0) 4))
+							       (aref (funcall df.args)  0) 4))
 						     (dotimes (i (funcall df.num_update_definitions))
 						       (for-range (d
 								   (slot-value df
