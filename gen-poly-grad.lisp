@@ -100,8 +100,40 @@ is replaced with replacement."
 		  (function (main ((argc :type int)
 				   (argv :type char**)) int)
 			    (let ((coeffs :type ImageParam
-					  :ctor (comma-list (funcall Float 64)
-							    1))))))))
+					  :ctor (comma-list
+						 (funcall Float 64)
+						 1))
+				  (learning_rate :type Param<double>)
+				  (order :type Param<int>)
+				  (samples :type Param<int>)
+				  (approx_sin :type Func)
+				  
+				  (x :type Var)
+				  (y :type Var)
+				  (fx :type Expr
+				      :init
+				      (*
+				       (/ x
+					  (funcall cast<double>
+						   samples))
+				       (funcall Expr
+						#.(/ pi 2))))
+				  (r :type RDom :ctor (comma-list 0 order))
+				  (r_flipped :type Expr
+					     :init (- 1 r))
+				  (exact_sin :type Func
+					     :init (funcall sin fx)))
+			      (setf (funcall approx_sin x y)
+				    (funcall cast<double> 0.0)
+				    (funcall approx_sin x r_flipped)
+				    (+
+				     (* fx (funcall coeffs r_flipped))
+				     (* (funcall approx_sin
+						 x
+						 (+ 1 r_flipped))
+					fx))
+				    )
+			      )))))
     (write-source "stage/cl-gen-halide-test/source/main" "cpp" code)))
 
 

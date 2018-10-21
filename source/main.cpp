@@ -40,5 +40,20 @@ using namespace Halide;
 //! @return Integer
 
 int main(int argc, char **argv) {
-  { ImageParam coeffs(Float(64), 1); }
+  {
+    ImageParam coeffs(Float(64), 1);
+    Param<double> learning_rate;
+    Param<int> order;
+    Param<int> samples;
+    Func approx_sin;
+    Var x;
+    Var y;
+    Expr fx = ((x / cast<double>(samples)) * Expr((1.5707963267948966e+0)));
+    RDom r(0, order);
+    Expr r_flipped = (1 - r);
+    Func exact_sin = sin(fx);
+    approx_sin(x, y) = cast<double>((0.0e+0f));
+    approx_sin(x, r_flipped) =
+        ((fx * coeffs(r_flipped)) + (approx_sin(x, (1 + r_flipped)) * fx));
+  }
 }
