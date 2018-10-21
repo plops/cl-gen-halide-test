@@ -221,8 +221,8 @@ is replaced with replacement."
 					    (dotimes (i terms)
 					      (setf (funcall c i)
 						    (/ (- (funcall c (- i 1)))
-						       (* i 2 (+ 1 (* i 2)))))))))
-				      (let ((steps :type "const int" :init 10000)
+						       (* i 2 (+ 1 (* i 2))))))))
+					(let ((steps :type "const int" :init 10000)
 					    (initial_error :type double :init 0d0))
 					(funcall learning_rate.set .00001)
 					(dotimes (i steps)
@@ -242,9 +242,8 @@ is replaced with replacement."
 						 (dotimes (j terms)
 						   (funcall printf (string "%g ")
 							    (funcall c j)))
-						 (funcall printf (string "\\n"))))))
-				       )))))
-			      )))))
+						 (funcall printf (string "\\n"))))))))
+				      )))))))))
     (write-source "stage/cl-gen-halide-test/source/main" "cpp" code)))
 
 

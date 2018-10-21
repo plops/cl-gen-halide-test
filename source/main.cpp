@@ -111,21 +111,21 @@ int main(int argc, char **argv) {
                   }
                 }
               }
-            }
-            {
-              const int steps = 10000;
-              double initial_error = (0.0e+0);
-              learning_rate.set((1.e-5f));
-              for (unsigned int i = 0; (i < steps); i += 1) {
-                {
-                  bool should_print =
-                      (((0 == i) || ((steps / 2) == i)) || (steps == i));
-                  if (should_print) {
-                    printf("Iteration %d\nCoefficients: ", i);
-                    for (unsigned int j = 0; (j < terms); j += 1) {
-                      printf("%g ", c(j));
+              {
+                const int steps = 10000;
+                double initial_error = (0.0e+0);
+                learning_rate.set((1.e-5f));
+                for (unsigned int i = 0; (i < steps); i += 1) {
+                  {
+                    bool should_print =
+                        (((0 == i) || ((steps / 2) == i)) || (steps == i));
+                    if (should_print) {
+                      printf("Iteration %d\nCoefficients: ", i);
+                      for (unsigned int j = 0; (j < terms); j += 1) {
+                        printf("%g ", c(j));
+                      }
+                      printf("\n");
                     }
-                    printf("\n");
                   }
                 }
               }
