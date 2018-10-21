@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
                           }
                           printf("\n");
                         }
-                        p.realize(e, c);
+                        p.realize({e, c});
                         if (should_print) {
                           printf("Error: %g\n", e());
                         }

@@ -244,7 +244,7 @@ is replaced with replacement."
 						(funcall printf (string "%g ")
 							 (funcall c j)))
 					      (funcall printf (string "\\n"))))
-					 (funcall p.realize e c)
+					 (funcall p.realize (list e c))
 					 (if should_print
 					     (funcall printf (string "Error: %g\\n") (funcall e)))
 					 (if (== 0 i)
