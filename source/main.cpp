@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
                     first = false;
                     continue;
                   }
-                  df.compute_root().vectorize((funcall df.args)[0], 4);
+                  df.compute_root().vectorize(df.args()[0], 4);
                   for (unsigned int i = 0; (i < df.num_update_definitions());
                        i += 1) {
                     for (auto d : df.update(i).get_schedule().dims()) {
@@ -92,6 +92,34 @@ int main(int argc, char **argv) {
                       }
                     }
                   }
+                }
+              }
+            }
+            {
+              const int terms = 8;
+              Buffer<double> c(terms);
+              order.set(terms);
+              samples.set(1000);
+              {
+                auto e = Buffer<double>::make_scalar();
+                coeffs.set(c);
+                {
+                  Pipeline p({avg_err, new_coeffs});
+                  c(0) = 1;
+                  for (unsigned int i = 0; (i < terms); i += 1) {
+                    c(i) = ((-(c((i - 1)))) / (i * 2 * (1 + (i * 2))));
+                  }
+                }
+              }
+            }
+            {
+              const int steps = 10000;
+              double initial_error = (0.0e+0);
+              learning_rate.set((1.e-5f));
+              for (unsigned int i = 0; (i < steps); i += 1) {
+                {
+                  bool should_print =
+                      (((0 == i) || ((steps / 2) == i)) || (steps == i));
                 }
               }
             }

@@ -208,9 +208,33 @@ is replaced with replacement."
 								       (slot-value df
 										   (funcall update i)
 										   (funcall vectorize (funcall Var d.var)
-											    4)
-										   )
-								       (raw break))))))))))))
+											    4))
+								       (raw break))))))))
+				      (let ((terms :type "const int" :init 8)
+					    (c :type Buffer<double> :ctor terms))
+					(funcall order.set terms)
+					(funcall samples.set 1000)
+					(let ((e :init (funcall "Buffer<double>::make_scalar")))
+					  (funcall coeffs.set c)
+					  (let ((p :type Pipeline :ctor (list avg_err new_coeffs)))
+					    (setf (funcall c 0) 1)
+					    (dotimes (i terms)
+					      (setf (funcall c i)
+						    (/ (- (funcall c (- i 1)))
+						       (* i 2 (+ 1 (* i 2)))))))))
+				      (let ((steps :type "const int" :init 10000)
+					    (initial_error :type double :init 0d0))
+					(funcall learning_rate.set .00001)
+					(dotimes (i steps)
+					  (let ((should_print :type bool
+							      :init
+							      (|\|\||
+							       (|\|\||
+								(== 0 i)
+								(== (/ steps 2) i)
+								)
+							       (== steps i))))))
+				       )))))
 			      )))))
     (write-source "stage/cl-gen-halide-test/source/main" "cpp" code)))
 
