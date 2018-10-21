@@ -131,8 +131,23 @@ is replaced with replacement."
 				     (* (funcall approx_sin
 						 x
 						 (+ 1 r_flipped))
-					fx))
-				    )
+					fx)))
+			      (let ((err
+				     :type Func
+				     :init
+				     (funcall pow
+					      (/ (-
+						  (funcall approx_sin x 0)
+						  (funcall exact_sin x))
+						 (funcall exact_sin x))
+					      2))
+				    (d :type RDom
+				       :ctor (comma-list 1 (- samples 1)))
+				    (avg_err :type Func
+					     :init
+					     (/ (funcall sum
+							 (funcall err d))
+						samples))))
 			      )))))
     (write-source "stage/cl-gen-halide-test/source/main" "cpp" code)))
 

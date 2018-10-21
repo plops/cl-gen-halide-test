@@ -55,5 +55,10 @@ int main(int argc, char **argv) {
     approx_sin(x, y) = cast<double>((0.0e+0f));
     approx_sin(x, r_flipped) =
         ((fx * coeffs(r_flipped)) + (approx_sin(x, (1 + r_flipped)) * fx));
+    {
+      Func err = pow(((approx_sin(x, 0) - exact_sin(x)) / exact_sin(x)), 2);
+      RDom d(1, (samples - 1));
+      Func avg_err = (sum(err(d)) / samples);
+    }
   }
 }
