@@ -109,22 +109,29 @@ int main(int argc, char **argv) {
                   for (unsigned int i = 0; (i < terms); i += 1) {
                     c(i) = ((-(c((i - 1)))) / (i * 2 * (1 + (i * 2))));
                   }
-                }
-              }
-              {
-                const int steps = 10000;
-                double initial_error = (0.0e+0);
-                learning_rate.set((1.e-5f));
-                for (unsigned int i = 0; (i < steps); i += 1) {
                   {
-                    bool should_print =
-                        (((0 == i) || ((steps / 2) == i)) || (steps == i));
-                    if (should_print) {
-                      printf("Iteration %d\nCoefficients: ", i);
-                      for (unsigned int j = 0; (j < terms); j += 1) {
-                        printf("%g ", c(j));
+                    const int steps = 10000;
+                    double initial_error = (0.0e+0);
+                    learning_rate.set((1.e-5f));
+                    for (unsigned int i = 0; (i < steps); i += 1) {
+                      {
+                        bool should_print =
+                            (((0 == i) || ((steps / 2) == i)) || (steps == i));
+                        if (should_print) {
+                          printf("Iteration %d\nCoefficients: ", i);
+                          for (unsigned int j = 0; (j < terms); j += 1) {
+                            printf("%g ", c(j));
+                          }
+                          printf("\n");
+                        }
+                        p.realize(e, c);
+                        if (should_print) {
+                          printf("Error: %g\n", e());
+                        }
+                        if ((0 == i)) {
+                          initial_error = e();
+                        }
                       }
-                      printf("\n");
                     }
                   }
                 }
